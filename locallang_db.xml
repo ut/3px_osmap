@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>database</type>
+		<description>Language labels for database tables/fields belonging to extension '3px_osmap'</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="tt_address.tx_3pxosmap_lat">Latitude</label>
+			<label index="tt_address.tx_3pxosmap_lon">Longitutde</label>
+			<label index="tx_3pxosmap_maps.sheet_general">General</label>
+			<label index="tx_3pxosmap_maps.sheet_map">Map</label>
+			<label index="tx_3pxosmap_maps">Maps</label>
+			<label index="tx_3pxosmap_maps.iconFile">Icon: File</label>
+			<label index="tx_3pxosmap_maps.iconWidth">Icon: Width</label>
+			<label index="tx_3pxosmap_maps.iconHeight">Icon: Height</label>
+			<label index="tx_3pxosmap_maps.mapWidth">Map: Width</label>
+			<label index="tx_3pxosmap_maps.mapHeight">Map: Height</label>
+			<label index="tx_3pxosmap_maps.zoom">Zoomlevel (1-18)</label>			
+			<label index="tt_content.list_type_pi1">OSM Map</label>
+		</languageKey>
+	</data>
+</T3locallang>

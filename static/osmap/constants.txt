@@ -1,0 +1,18 @@
+plugin.tx_3pxosmap_pi1 {
+  
+  # cat=plugin.tx_3pxosmap_pi1//0; type=file[gif,png]; label= Default Icon
+  iconFile = EXT:3px_osmap/res/osmap_marker1_red.png
+  # cat=plugin.tx_3pxosmap_pi1//0; type=int+; label= Icon Width
+  iconWidth =  21
+  # cat=plugin.tx_3pxosmap_pi1//0; type=int+; label= Icon Height 
+  iconHeight = 25
+  # cat=plugin.tx_3pxosmap_pi1//0; type=int+; label= Zoom Level (1-18)
+  zoom = 10
+  # cat=plugin.tx_3pxosmap_pi1//0; type=int+; label= Map Width
+  mapWidth  = 600
+  # cat=plugin.tx_3pxosmap_pi1//1; type=int+; label= Map Height
+  mapHeight  = 400
+  # cat=plugin.tx_3pxosmap_pi1//1; type=int+; label= PID of the page containing the adress data
+  pid  = 
+}
+  

@@ -1,0 +1,9 @@
+plugin.tx_3pxosmap_pi1 {
+	iconFile = {$plugin.tx_3pxosmap_pi1.iconFile}
+	iconWidth = {$plugin.tx_3pxosmap_pi1.iconWidth}
+	iconHeight = {$plugin.tx_3pxosmap_pi1.iconHeight}
+	mapWidth = {$plugin.tx_3pxosmap_pi1.mapWidth}
+	mapHeight = {$plugin.tx_3pxosmap_pi1.mapHeight}
+	zoom = {$plugin.tx_3pxosmap_pi1.zoom}
+	pid = {$plugin.tx_3pxosmap_pi1.pid}
+}
