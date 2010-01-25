@@ -75,8 +75,20 @@ class tx_3pxosmap_pi1 extends tslib_pibase {
 	}
 	function getAddress($pid='') {
     $table = 'tt_address';
-    $where = 'pid='.$pid; 
-    $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('*',$table,$where,'');
+    // via flexform
+    $pages = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'pages', 'sDEF');
+    // via ts 
+    if (!$pages) {
+      $pages = $pid;
+    }
+    // the page itself
+    if (!$pages) {
+        $pages = $this->pi_getPidList($this->cObj->data['pages'],$this->cObj->data['recursive']);
+    }
+    //t3lib_div::debug($this->cObj->data['pi_flexform']); 
+    $where = ' pid IN ('.$pages.')';
+     
+    $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('*',$table,$where,'','','');
     $i = 0;
     while ($row= $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
       if ( $row['name'] ) {
