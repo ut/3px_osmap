@@ -66,6 +66,7 @@ class tx_3pxosmap_pi1 extends tslib_pibase {
 		$this->pi_loadLL();
 		$pid = $this->conf['pid'];
 		$this->init();
+		$addresses  = array(); 
     $addresses = $this->getAddress($pid);
 		
 		$content = $this->makeMap($addresses);

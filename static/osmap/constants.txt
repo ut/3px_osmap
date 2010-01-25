@@ -1,7 +1,7 @@
 plugin.tx_3pxosmap_pi1 {
   
   # cat=plugin.tx_3pxosmap_pi1//0; type=file[gif,png]; label= Default Icon
-  iconFile = EXT:3px_osmap/res/osmap_marker1_red.png
+  iconFile = osmap_marker1_red.png
   # cat=plugin.tx_3pxosmap_pi1//0; type=int+; label= Icon Width
   iconWidth =  21
   # cat=plugin.tx_3pxosmap_pi1//0; type=int+; label= Icon Height 
