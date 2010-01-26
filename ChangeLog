@@ -1,5 +1,11 @@
-(add new changes on top of this file)
+10-01-29 Ulf Treger  <ulf.treger@3plusx.de>
+  
+  * Code review
+  * DRYed up js code
+  * Better calculation of mapextent and zoomlevel    
+
 
 09-12-03 Ulf Treger  <ulf.treger@3plusx.de>
 
 	* Initial release
+

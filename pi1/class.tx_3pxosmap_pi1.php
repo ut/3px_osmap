@@ -87,6 +87,7 @@ class tx_3pxosmap_pi1 extends tslib_pibase {
     }
     //t3lib_div::debug($this->cObj->data['pi_flexform']); 
     $where = ' pid IN ('.$pages.')';
+    $where .= ' AND hidden=0';
      
     $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('*',$table,$where,'','','');
     $i = 0;
@@ -109,8 +110,9 @@ class tx_3pxosmap_pi1 extends tslib_pibase {
   }
 
   function makeMap($addresses) {
-    $script_url = t3lib_extMgm::siteRelPath($this->extKey).'scripts/OpenLayers/OpenLayers.js';
-    $GLOBALS['TSFE']->additionalHeaderData[$this->prefixId] = '<script type="text/javascript" src="'.$script_url.'" language="JavaScript"></script><script type="text/javascript" src="http://openstreetmap.org/openlayers/OpenStreetMap.js" language="JavaScript"></script>';
+    $script_url1 = t3lib_extMgm::siteRelPath($this->extKey).'scripts/OpenLayers/OpenLayers.js';
+    $script_url2 = t3lib_extMgm::siteRelPath($this->extKey).'scripts/OpenLayers/OpenStreetMap.js';
+    $GLOBALS['TSFE']->additionalHeaderData[$this->prefixId] = '<script type="text/javascript" src="'.$script_url1.'" language="JavaScript"></script><script type="text/javascript" src="'.$script_url2.'" language="JavaScript"></script>';
     $iconUrl = "typo3conf/ext/3px_osmap/res/".$this->conf['iconFile'];
     
     $zoom = $this->conf['zoom'] ? $this->conf['zoom'] : 10;
@@ -133,86 +135,115 @@ class tx_3pxosmap_pi1 extends tslib_pibase {
         }
         var currentPopup;
         var zoom = '.$zoom.';
-            var map = new OpenLayers.Map("tx_3pxosmap_pi1_map", {
+
+        // layers            
+        var mapnik_layer = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
+        var tah_layer = new OpenLayers.Layer.OSM.Osmarender("Osmarender");
+        var cyclemap_layer = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
+
+        // icon
+        var size = new OpenLayers.Size('.$this->conf['iconWidth'].','.$this->conf['iconHeight'].');
+        var offset = new OpenLayers.Pixel(-((size.w/2)-0), -(size.h-0));
+        var offset = 0;
+        var icon = new OpenLayers.Icon("'.$iconUrl.'",size,offset);
+        icon.setOpacity(0.8);
+      ';
+      $min_lat = -90; $max_lat = 90;
+      $min_lon = -180; $max_lon = 180;
+      foreach ($addresses as $address) {
+        $address_description = $address['address'];
+        if (($address['address'])&&($address['city'])) { $address_description .= ', '; }
+        $address_description .= $address['zip'].' '.$address['city'];
+        $map_entries .= '
+            DrawAddressEntry('.$address['lon'].','.$address['lat'].',"'.$address['uid'].'","'.$address['name'].'","'.$address_description.'");
+        ';
+        if ($max_lat > $address['lat']  ) {
+            $max_lat = $address['lat'];
+        }
+        if ($min_lat < $address['lat']  ) {
+            $min_lat = $address['lat'];
+        }
+        if ($max_lon > $address['lon']  ) {
+            $max_lon = $address['lon'];
+        }
+        if ($min_lon < $address['lon']  ) {
+            $min_lon = $address['lon'];
+        }
+      }
+      
+      $map .= '
+      
+          // bounds
+          var p_min = new OpenLayers.Geometry.Point('.$min_lon.', '.$min_lat.');
+          p_min.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913")); 
+
+          var p_max = new OpenLayers.Geometry.Point('.$max_lon.', '.$max_lat.');
+          p_max.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913")); 
+
+          var bounds = new OpenLayers.Bounds();
+          bounds.extend(p_min);
+          bounds.extend(p_max);
+          bounds.toBBOX(); 
+
+          // map      
+          var map = new OpenLayers.Map("tx_3pxosmap_pi1_map", {
             controls: [
               new OpenLayers.Control.KeyboardDefaults(),
               new OpenLayers.Control.MouseDefaults(),
               new OpenLayers.Control.LayerSwitcher(),
               new OpenLayers.Control.PanZoomBar()],
-              maxExtent:
-              new OpenLayers.Bounds(-20037508.34, -20037508.34,
-          			   20037508.34,  20037508.34),
+              maxExtent: bounds,
               numZoomLevels: 18,
               maxResolution: 156543,
               units: "meters",
               projection: "EPSG:41001"} );
-           
-            var mapnik_layer = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
-            var tah_layer = new OpenLayers.Layer.OSM.Osmarender("Osmarender");
-            var cyclemap_layer = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
-   
-            map.addLayers([mapnik_layer, tah_layer, cyclemap_layer]);
-
-            var size = new OpenLayers.Size('.$this->conf['iconWidth'].','.$this->conf['iconHeight'].');
-            var offset = new OpenLayers.Pixel(-((size.w/2)-0), -(size.h-0));
-            var offset = 0;
-            var icon = new OpenLayers.Icon("'.$iconUrl.'",size,offset);
-
-            icon.setOpacity(0.8);
-            var markers = new OpenLayers.Layer.Markers( "map" );
-            map.addLayer(markers);
+              
+              
+          map.addLayers([mapnik_layer, tah_layer, cyclemap_layer]);
             
+          var markers = new OpenLayers.Layer.Markers( "map" );
+          map.addLayer(markers);
             
-            var markerClick = function (evt) {
-                if (this.popup == null) {
-                    this.popup = this.createPopup(true);
-                    this.popup.setOpacity(0.8);
-                    map.addPopup(this.popup);
-                    this.popup.show();
-                } else {
-                    this.popup.toggle();
-                }
-                currentPopup = this.popup;
-                OpenLayers.Event.stop(evt);
-            };
-      ';
-       $c_lat = 0; $y = 0;
-      foreach ($addresses as $address) {
-        $map .= '
- 
-            var coords =  new OpenLayers.LonLat(Lon2Merc('.$address['lon'].'),Lat2Merc('.$address['lat'].'));
-            var feature = new OpenLayers.Feature('.$address['uid'].',coords);
+          var markerClick = function (evt) {
+              if (this.popup == null) {
+                  this.popup = this.createPopup(true);
+                  this.popup.setOpacity(0.8);
+                  map.addPopup(this.popup);
+                  this.popup.show();
+              } else {
+                  this.popup.toggle();
+              }
+              currentPopup = this.popup;
+              OpenLayers.Event.stop(evt);
+          };
+                        
+          function DrawAddressEntry(lon,lat,uid,name,description) {
+            var coords =  new OpenLayers.LonLat(Lon2Merc(lon),Lat2Merc(lat));
+            var feature = new OpenLayers.Feature(uid,coords);
             feature.popupClass = OpenLayers.Class(OpenLayers.Popup.FramedCloud, { minSize: new OpenLayers.Size(150, 100) });
-            feature.data.popupContentHTML = "<div class=\"popup\"><strong>'.$address['name'].'</strong><br />'.$address['address'].', '.$address['zip'].' '.$address['city'].'</div>";
-
-            // marker = feature.createMarker();
+            feature.data.popupContentHTML = "<div class=\"popup\"><strong>" + name + "</strong><br />" + description + "</div>";
             var marker = new OpenLayers.Marker(coords,icon.clone());
             marker.feature = feature;
-
             markers.addMarker(marker);
             marker.events.register("click", feature, markerClick);
-
-              
-        ';
-        $c_lat =  $c_lat + $address['lat'];
-        $c_lon =  $c_lon + $address['lon'];
-        $y++;
-
           
-      }
-      // calc map center 
-      $c_lat = $c_lat / $y;
-      $c_lon = $c_lon / $y;
-      // recalc zoom!!!
-      
-      $map .= '
-            var x = Lon2Merc('.$c_lon.');
-            var y = Lat2Merc('.$c_lat.');
-            map.setCenter(new OpenLayers.LonLat(x, y), zoom);
+          }
+          // draw all entries
+          '.$map_entries.'
   
+          // extent & zoom to zoomlevel
+          map.zoomToExtent(bounds)
+          // get current zoom 
+          var current_zoom = map.getZoom();
+          // avoid that predefined zoom it to large to show all entries
+          if ( zoom > current_zoom ) {
+              zoom = current_zoom;
+          }
+          map.zoomTo(zoom);
+
       </script>
       </div>
-      <div id="tx_3pxosmap_pi1_credits">karte von <a href="http://www.openstreetmap.de/">openstreetmap</a>, anzeige mit <a href="http://www.openlayers.org/">openlayers</a></div>
+      <div id="tx_3pxosmap_pi1_credits">karte von <a href="http://www.openstreetmap.org/">openstreetmap</a>, anzeige mit <a href="http://www.openlayers.org/">openlayers</a></div>
       
     
     ';
