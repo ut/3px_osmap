@@ -88,6 +88,7 @@ class tx_3pxosmap_pi1 extends tslib_pibase {
     //t3lib_div::debug($this->cObj->data['pi_flexform']); 
     $where = ' pid IN ('.$pages.')';
     $where .= ' AND hidden=0';
+    $where .= ' AND deleted=0';
      
     $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('*',$table,$where,'','','');
     $i = 0;
@@ -221,7 +222,7 @@ class tx_3pxosmap_pi1 extends tslib_pibase {
             var coords =  new OpenLayers.LonLat(Lon2Merc(lon),Lat2Merc(lat));
             var feature = new OpenLayers.Feature(uid,coords);
             feature.popupClass = OpenLayers.Class(OpenLayers.Popup.FramedCloud, { minSize: new OpenLayers.Size(150, 100) });
-            feature.data.popupContentHTML = "<div class=\"popup\"><strong>" + name + "</strong><br />" + description + "</div>";
+            feature.data.popupContentHTML = "<div><strong>" + name + "</strong><br />" + description + "</div>";
             var marker = new OpenLayers.Marker(coords,icon.clone());
             marker.feature = feature;
             markers.addMarker(marker);
